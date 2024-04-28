@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Download Processed File</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='styles/style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans&amp;display=swap" rel="stylesheet">
+</head>
+<body>
+    <h1>Processing complete!</h1>
+    <p>Your processed file is ready to download:</p>
+    <a id="downloadLink" style="display: none;" href="{{ url_for('download_file', filename=filename) }}" target="_blank">Download processed file</a>
+    <a id="backupLink" href="{{ url_for('download_file', filename=filename) }}">If the download doesn't start automatically, click here</a>
+    <p>The download may have been blocked as a pop-up. <br />The link above needs to be copied and pasted outside of the ESRI app to work.</p>
+
+    <script>
+        window.onload = function() {
+            var downloadLink = document.getElementById('downloadLink');
+            downloadLink.click();
+            downloadLink.style.display = 'none';
+            var backupLink = document.getElementById('backupLink');
+            backupLink.style.display = 'block';
+        };
+    </script>
+</body>
+</html>

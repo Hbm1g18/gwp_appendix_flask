@@ -1,0 +1,285 @@
+
+        \documentclass[12pt, letterpaper]{article}
+        \usepackage{graphicx}
+        \usepackage{subcaption}
+        \usepackage[left=10mm,right=10mm,top=5mm,bottom=5mm,paper=a4paper]{geometry}
+        \usepackage{multirow}
+        \usepackage{caption}  % Added for \captionof
+        \usepackage{xcolor}
+        \usepackage{fontspec}
+        \setmainfont{Tahoma}
+        \usepackage[utf8]{inputenc}
+
+        \setlength{\fboxsep}{0pt} % <-- Add this line
+        \captionsetup[subfigure]{labelformat=empty}
+
+        \begin{document}
+        
+        \begin{figure}[h]
+            \centering
+            \fbox{\parbox{1\linewidth}{
+            \vspace{5mm}
+                \begin{subfigure}{\linewidth}
+                    \centering
+                    \includegraphics[width=0.37\textheight, angle=-90]{photos/1.png}
+                    \captionsetup{width=0.8\linewidth}
+                    \caption{Photograph 4 - nan, nan}
+                    %\label{fig:dragon1}
+                \end{subfigure}
+
+                \vspace{\baselineskip}
+
+                \begin{subfigure}{\linewidth}
+                    \centering
+                    \includegraphics[width=0.37\textheight, angle=-90]{photos/2.png}
+                    \captionsetup{width=0.8\linewidth}
+                    \caption{Photograph 5 - nan, nan}
+                    %\label{fig:dragon1}
+                \end{subfigure}
+
+                    \vspace{\baselineskip}
+
+                    \hrule
+                    \begin{minipage}[c][3.5cm][t]{0.4\textwidth} % Larger Left side
+                            \begin{minipage}[t][1.5cm][t]{0.4\textwidth} % Set explicit width for Right top
+                            \vspace{2mm}
+                            \hspace{2mm}
+                                \raggedright
+                                \textbf{\small{Notes:} \footnotesize{}}
+
+                            \end{minipage}
+                            \hrule
+                                    \begin{minipage}[c][2cm][c]{\textwidth} % Adjust height and alignment
+                                \centering
+                                        \includegraphics[height=1.8cm]{photos/1.png}
+                                    \end{minipage}
+                            \end{minipage}%
+                            \vline % Vertical line
+                            \begin{minipage}[c][3cm][t]{0.6\textwidth} % Larger Right side with no indentation
+                                \begin{minipage}[c][1cm][t]{0.8\textwidth} % Set explicit width for Right top
+                                \vspace{2mm}     
+                                \hspace{2mm}
+                                    \raggedright
+                                \textbf{\small{Client: } \footnotesize{}} 
+                                \end{minipage}
+                                \hrule % Horizontal line
+                                \begin{minipage}[c][1.4cm][t]{0.9\textwidth} % Set explicit width for Right bottom
+                                    \vspace{2mm}
+                                    \hspace*{2mm}
+                                    \raggedright
+                                    \parbox[t]{\linewidth}{\textbf{\small{Project:}} {\hangindent=2mm }}
+                                \end{minipage}
+                                \hrule % Horizontal line
+                                \begin{minipage}[c][0.6cm][t]{0.8\textwidth} % Set explicit width for Right bottom    
+                                \vspace{2mm}
+                                \hspace{2mm}
+                                    \raggedright
+                                \textbf{\footnotesize Appendix: } 
+                                \end{minipage}
+                            \end{minipage}
+                        
+                }}
+        \end{figure}
+        \clearpage
+        
+        \begin{figure}[h]
+            \centering
+            \fbox{\parbox{1\linewidth}{
+            \vspace{5mm}
+                \begin{subfigure}{\linewidth}
+                    \centering
+                    \includegraphics[width=0.37\textheight, angle=-90]{photos/3.png}
+                    \captionsetup{width=0.8\linewidth}
+                    \caption{Photograph 6 - 11.229775, 42.80292833333333}
+                    %\label{fig:dragon1}
+                \end{subfigure}
+
+                \vspace{\baselineskip}
+
+                \begin{subfigure}{\linewidth}
+                    \centering
+                    \includegraphics[width=0.37\textheight, angle=-90]{photos/4.png}
+                    \captionsetup{width=0.8\linewidth}
+                    \caption{Photograph 6 - 11.229775, 42.80292833333333}
+                    %\label{fig:dragon1}
+                \end{subfigure}
+
+                    \vspace{\baselineskip}
+
+                    \hrule
+                    \begin{minipage}[c][3.5cm][t]{0.4\textwidth} % Larger Left side
+                            \begin{minipage}[t][1.5cm][t]{0.4\textwidth} % Set explicit width for Right top
+                            \vspace{2mm}
+                            \hspace{2mm}
+                                \raggedright
+                                \textbf{\small{Notes:} \footnotesize{}}
+
+                            \end{minipage}
+                            \hrule
+                                    \begin{minipage}[c][2cm][c]{\textwidth} % Adjust height and alignment
+                                \centering
+                                        \includegraphics[height=1.8cm]{photos/1.png}
+                                    \end{minipage}
+                            \end{minipage}%
+                            \vline % Vertical line
+                            \begin{minipage}[c][3cm][t]{0.6\textwidth} % Larger Right side with no indentation
+                                \begin{minipage}[c][1cm][t]{0.8\textwidth} % Set explicit width for Right top
+                                \vspace{2mm}     
+                                \hspace{2mm}
+                                    \raggedright
+                                \textbf{\small{Client: } \footnotesize{}} 
+                                \end{minipage}
+                                \hrule % Horizontal line
+                                \begin{minipage}[c][1.4cm][t]{0.9\textwidth} % Set explicit width for Right bottom
+                                    \vspace{2mm}
+                                    \hspace*{2mm}
+                                    \raggedright
+                                    \parbox[t]{\linewidth}{\textbf{\small{Project:}} {\hangindent=2mm }}
+                                \end{minipage}
+                                \hrule % Horizontal line
+                                \begin{minipage}[c][0.6cm][t]{0.8\textwidth} % Set explicit width for Right bottom    
+                                \vspace{2mm}
+                                \hspace{2mm}
+                                    \raggedright
+                                \textbf{\footnotesize Appendix: } 
+                                \end{minipage}
+                            \end{minipage}
+                        
+                }}
+        \end{figure}
+        \clearpage
+        
+        \begin{figure}[h]
+            \centering
+            \fbox{\parbox{1\linewidth}{
+            \vspace{5mm}
+                \begin{subfigure}{\linewidth}
+                    \centering
+                    \includegraphics[width=0.37\textheight, angle=-90]{photos/5.png}
+                    \captionsetup{width=0.8\linewidth}
+                    \caption{Photograph 6 - 11.229775, 42.80292833333333}
+                    %\label{fig:dragon1}
+                \end{subfigure}
+
+                \vspace{\baselineskip}
+
+                \begin{subfigure}{\linewidth}
+                    \centering
+                    \includegraphics[width=0.37\textheight, angle=-90]{photos/6.png}
+                    \captionsetup{width=0.8\linewidth}
+                    \caption{Photograph 9 - 11.249659999999997, 42.830133333333336}
+                    %\label{fig:dragon1}
+                \end{subfigure}
+
+                    \vspace{\baselineskip}
+
+                    \hrule
+                    \begin{minipage}[c][3.5cm][t]{0.4\textwidth} % Larger Left side
+                            \begin{minipage}[t][1.5cm][t]{0.4\textwidth} % Set explicit width for Right top
+                            \vspace{2mm}
+                            \hspace{2mm}
+                                \raggedright
+                                \textbf{\small{Notes:} \footnotesize{}}
+
+                            \end{minipage}
+                            \hrule
+                                    \begin{minipage}[c][2cm][c]{\textwidth} % Adjust height and alignment
+                                \centering
+                                        \includegraphics[height=1.8cm]{photos/1.png}
+                                    \end{minipage}
+                            \end{minipage}%
+                            \vline % Vertical line
+                            \begin{minipage}[c][3cm][t]{0.6\textwidth} % Larger Right side with no indentation
+                                \begin{minipage}[c][1cm][t]{0.8\textwidth} % Set explicit width for Right top
+                                \vspace{2mm}     
+                                \hspace{2mm}
+                                    \raggedright
+                                \textbf{\small{Client: } \footnotesize{}} 
+                                \end{minipage}
+                                \hrule % Horizontal line
+                                \begin{minipage}[c][1.4cm][t]{0.9\textwidth} % Set explicit width for Right bottom
+                                    \vspace{2mm}
+                                    \hspace*{2mm}
+                                    \raggedright
+                                    \parbox[t]{\linewidth}{\textbf{\small{Project:}} {\hangindent=2mm }}
+                                \end{minipage}
+                                \hrule % Horizontal line
+                                \begin{minipage}[c][0.6cm][t]{0.8\textwidth} % Set explicit width for Right bottom    
+                                \vspace{2mm}
+                                \hspace{2mm}
+                                    \raggedright
+                                \textbf{\footnotesize Appendix: } 
+                                \end{minipage}
+                            \end{minipage}
+                        
+                }}
+        \end{figure}
+        \clearpage
+        
+        \begin{figure}[h]
+            \centering
+            \fbox{\parbox{1\linewidth}{
+            \vspace{5mm}
+                \begin{subfigure}{\linewidth}
+                    \centering
+                    \includegraphics[width=0.37\textheight, angle=-90]{photos/7.png}
+                    \captionsetup{width=0.8\linewidth}
+                    \caption{Photograph 10 - 11.252418333333331, 42.79961166666667}
+                    %\label{fig:dragon1}
+                \end{subfigure}
+
+                \vspace{\baselineskip}
+
+                \begin{subfigure}{\linewidth}
+                    \centering
+                    \includegraphics[width=0.37\textheight, angle=-90]{photos/7.png}
+                    \captionsetup{width=0.8\linewidth}
+                    \caption{Photograph 10 - 11.252418333333331, 42.79961166666667}
+                    %\label{fig:dragon1}
+                \end{subfigure}
+
+                    \vspace{\baselineskip}
+
+                    \hrule
+                    \begin{minipage}[c][3.5cm][t]{0.4\textwidth} % Larger Left side
+                            \begin{minipage}[t][1.5cm][t]{0.4\textwidth} % Set explicit width for Right top
+                            \vspace{2mm}
+                            \hspace{2mm}
+                                \raggedright
+                                \textbf{\small{Notes:} \footnotesize{}}
+
+                            \end{minipage}
+                            \hrule
+                                    \begin{minipage}[c][2cm][c]{\textwidth} % Adjust height and alignment
+                                \centering
+                                        \includegraphics[height=1.8cm]{photos/1.png}
+                                    \end{minipage}
+                            \end{minipage}%
+                            \vline % Vertical line
+                            \begin{minipage}[c][3cm][t]{0.6\textwidth} % Larger Right side with no indentation
+                                \begin{minipage}[c][1cm][t]{0.8\textwidth} % Set explicit width for Right top
+                                \vspace{2mm}     
+                                \hspace{2mm}
+                                    \raggedright
+                                \textbf{\small{Client: } \footnotesize{}} 
+                                \end{minipage}
+                                \hrule % Horizontal line
+                                \begin{minipage}[c][1.4cm][t]{0.9\textwidth} % Set explicit width for Right bottom
+                                    \vspace{2mm}
+                                    \hspace*{2mm}
+                                    \raggedright
+                                    \parbox[t]{\linewidth}{\textbf{\small{Project:}} {\hangindent=2mm }}
+                                \end{minipage}
+                                \hrule % Horizontal line
+                                \begin{minipage}[c][0.6cm][t]{0.8\textwidth} % Set explicit width for Right bottom    
+                                \vspace{2mm}
+                                \hspace{2mm}
+                                    \raggedright
+                                \textbf{\footnotesize Appendix: } 
+                                \end{minipage}
+                            \end{minipage}
+                        
+                }}
+        \end{figure}
+        \clearpage
+        \end{document}

@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='styles/style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans&amp;display=swap" rel="stylesheet">
+</head>
+<body>
+    <h1 class="title">Upload CSV</h1>
+    <form method="POST" enctype="multipart/form-data" class="upl_form">
+        <div id="file-upload-container" class="custom-file-upload">
+            <span id="file-upload-text">Drag CSV File Here</span>
+            <input id="file-upload" type="file" name="file" accept=".csv" required>
+        </div>      
+        <button type="submit" class="button-3">Upload</button>
+    </form>
+
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const fileUpload = document.getElementById("file-upload");
+            const fileUploadText = document.getElementById("file-upload-text");
+
+            fileUpload.addEventListener("change", function() {
+                if (fileUpload.files.length > 0) {
+                    fileUploadText.textContent = fileUpload.files[0].name;
+                } else {
+                    fileUploadText.textContent = "Click/Drag CSV file";
+                }
+            });
+
+            const fileUploadContainer = document.getElementById("file-upload-container");
+
+            fileUploadContainer.addEventListener("dragover", function(event) {
+                event.preventDefault();
+                fileUploadContainer.classList.add("dragover");
+            });
+
+            fileUploadContainer.addEventListener("dragleave", function(event) {
+                event.preventDefault();
+                fileUploadContainer.classList.remove("dragover");
+            });
+
+            fileUploadContainer.addEventListener("drop", function(event) {
+                event.preventDefault();
+                fileUploadContainer.classList.remove("dragover");
+                const files = event.dataTransfer.files;
+                if (files.length > 0) {
+                    fileUpload.files = files;
+                    fileUploadText.textContent = files[0].name;
+                }
+            });
+        });
+
+    </script>
+</body>
+</html>

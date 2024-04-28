@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Choose attributes</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles/style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans&amp;display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <script>
+        var firstRow = {{ df.iloc[0].to_json()|safe }};
+        
+        function addDropdown() {
+            var dropdownContainer = document.getElementById("dropdown-container");
+            var newDropdown = document.createElement("div");
+            var dropdownCount = dropdownContainer.childElementCount + 1;
+            newDropdown.innerHTML = `<select name="header${dropdownCount}" class="header-dropdown" onchange="updatePreview()">
+                                        {% for header in headers %}
+                                            <option value="{{ header }}">{{ header }}</option>
+                                        {% endfor %}
+                                    </select>
+                                    <button type="button" onclick="removeDropdown(this)">-</button>`;
+            dropdownContainer.appendChild(newDropdown);
+            updatePreview();
+            // Update the header_count input field
+            document.getElementById("header_count").value = dropdownCount;
+
+            // Add the initial header option to the newly created dropdown
+            var initialHeader = document.createElement("option");
+            initialHeader.text = "{{ headers[0] }}";
+            initialHeader.value = "{{ headers[0] }}";
+            dropdownContainer.lastElementChild.firstChild.insertBefore(initialHeader, dropdownContainer.lastElementChild.firstChild.firstChild);
+        }
+
+        function removeDropdown(button) {
+            var dropdownContainer = document.getElementById("dropdown-container");
+            dropdownContainer.removeChild(button.parentNode);
+            updatePreview();
+            // Update the header_count input field
+            document.getElementById("header_count").value = dropdownContainer.childElementCount;
+        }
+
+        function updatePreview() {
+            var previewContainer = document.getElementById("preview");
+            var previewString = "Photo: OBJECTID - ";
+            var dropdowns = document.getElementsByClassName("header-dropdown");
+            for (var i = 0; i < dropdowns.length; i++) {
+                var selectedOption = dropdowns[i].options[dropdowns[i].selectedIndex].value;
+                previewString += firstRow[selectedOption];
+                if (i < dropdowns.length - 1) {
+                    previewString += ", ";
+                }
+            }
+            previewContainer.textContent = previewString;
+        }
+    </script>
+    <script>
+        function showSpinner() {
+            document.getElementById("submit-button").style.display = "none";
+            document.getElementById("spinner").style.display = "inline-block";
+        }
+    </script>
+</head>
+<body>
+    <h1 class="title_2">Additional Details</h1>
+    <h3>Don't include URLs, this is done automatically</h3>
+    <form action="/process_data" method="POST" onsubmit="showSpinner()">
+        <input type="hidden" name="filename" value="{{ filename }}">
+        
+        <br><br>
+        <h3>Default, required for generation</h3>
+        <select name="header0" class="header-dropdown" onchange="updatePreview()">
+            {% for header in headers %}
+                <option value="{{ header }}">{{ header }}</option>
+            {% endfor %}
+        </select>
+        <button type="button" onclick="addDropdown()">+</button>
+
+        <div id="dropdown-container">
+            
+        </div>
+        
+        <h2>Preview:</h2>
+        <div id="preview"></div>
+        <br>
+        <div class="form_holder">
+            <label class="form_label" for="project">Project Title:</label>
+            <input class="form_text" type="text" id="project" name="project"><br><br>
+
+            <label class="form_label" for="client">Client:</label>
+            <input class="form_text" type="text" id="client" name="client"><br><br>
+
+            <label class="form_label" for="appendix">Appendix Number:</label>
+            <input class="form_text" type="text" id="appendix" name="appendix"><br><br>
+
+            <label class="form_label" for="notes">Notes:</label>
+            <textarea class="form_text" id="notes" name="notes"></textarea><br><br>
+
+            <div class="form_group">
+                <input type="checkbox" id="split_data" name="split_data" value="true">
+                <label for="split_data">Split data by field</label>
+            </div>
+
+            <div id="split_field" style="display: none;">
+                <label for="split_field_dropdown">Choose a field to split by:</label>
+                <select name="split_field_dropdown" id="split_field_dropdown">
+                    {% for header in headers %}
+                        <option value="{{ header }}">{{ header }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form_group">
+                <input type="checkbox" id="two_per_page" name="two_per_page" value="true">
+                <label for="two_per_page">Print two per page</label>
+            </div>
+
+            <input type="hidden" name="header_count" id="header_count" value="1">
+            <!-- <button type="submit" class="button-3">Submit</button> -->
+        </div>
+
+        <div class="form_holder">
+            <button type="submit" class="button-3" id="submit-button">Submit</button>
+            <div class="spinner" id="spinner"><i class="fas fa-spinner fa-spin"></i></div>
+        </div>
+        
+    </form>
+
+    <script>
+        document.getElementById('split_data').addEventListener('change', function() {
+            var splitFieldDiv = document.getElementById('split_field');
+            splitFieldDiv.style.display = this.checked ? 'block' : 'none';
+        });
+    </script>
+</body>
+</html>

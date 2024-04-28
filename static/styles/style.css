@@ -1,0 +1,121 @@
+body{
+    font-family: 'Helvetica Arial', sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    width: 99vw;
+    height: 100vh;
+    overflow: scroll
+}
+.title{
+    font-size: 8vh;
+}
+.title_2{
+    font-size: 6vh;
+}
+
+.custom-file-upload {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 30vw;
+    height: 30vh;
+    background-color: #f0f0f0; /* Light gray background */
+    border-radius: 5px;
+    border: 2px solid transparent;
+    text-align: center;
+    line-height: 10vh;
+    cursor: pointer;
+    margin: 10px; /* Add margin to create indentation effect */
+    box-shadow: inset 2px 2px 5px rgba(0, 0, 0, 0.2); /* Add shadow for depth */
+    font-family: 'Helvetica Arial', sans-serif;
+    font-weight: bold;
+    font-size: 3vh;
+}
+
+.custom-file-upload input[type=file] {
+    display: none;
+}
+
+.custom-file-upload span {
+    display: inline-block;
+    vertical-align: middle;
+}
+
+.upl_form{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+}
+
+.button-3 {
+  appearance: none;
+  background-color: #2ea44f;
+  border: 1px solid rgba(27, 31, 35, .15);
+  border-radius: 6px;
+  box-shadow: rgba(27, 31, 35, .1) 0 1px 0;
+  box-sizing: border-box;
+  color: #fff;
+  cursor: pointer;
+  display: inline-block;
+  font-family: 'Helvetica Arial', sans-serif;
+  font-weight: bold;
+  font-size: 3vh;
+  padding: 6px 16px;
+  position: relative;
+  text-align: center;
+  text-decoration: none;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+  vertical-align: middle;
+  white-space: nowrap;
+  margin-top: 5vh;
+}
+
+.form_holder {
+    width: 90%; /* Adjust width as needed */
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+}
+
+.form_label {
+    width: calc(30% - 10px); /* Adjust width as needed */
+    margin-right: 10px;
+    font-family: 'Helvetica Arial', sans-serif;
+    font-weight: bold;
+    text-align: right;
+}
+
+.form_text {
+    width: calc(70% - 10px); /* Adjust width as needed */
+    text-align: center;
+    font-family: 'Helvetica Arial', sans-serif;
+    margin-bottom: 10px;
+}
+
+#dropdown-container {
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+}
+
+.form_group {
+    width: 100%; /* Adjust width as needed */
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px; /* Adjust margin as needed */
+}
+
+.form_group input[type="checkbox"] {
+    margin-right: 10px; /* Adjust margin as needed */
+}
+
+.spinner{
+    font-size: 5vh;
+    display: none;
+}
