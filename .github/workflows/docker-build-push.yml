@@ -30,7 +30,6 @@ jobs:
               # Stop the Docker container if it's running
               docker stop appendix || true &&
               
-              # Build the Docker image
               docker build -t appendix . &&
               
               docker run -d -p 8080:8080 -e FLASK_RUN_HOST=0.0.0.0 appendix
