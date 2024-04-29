@@ -19,21 +19,12 @@ jobs:
             USER_NAME: ${{secrets.EC2_USERNAME}}
 
         run: |
-          echo "Private key is: $PRIVATE_KEY"
+          echo "Starting deployment"
           echo "$PRIVATE_KEY" > private_key && chmod 600 private_key
           ssh -o StrictHostKeyChecking=no -i private_key ec2-user@16.170.255.102 '
-
-              # Now we have got the access of EC2 and we will start the deploy .
               cd gwp_appendix_flask/ &&
-              
               git pull origin main &&
-              
-              # Stop the Docker container if it's running
               docker stop appendix || true &&
-              
-              # Build the Docker image
               docker build -t appendix . &&
-              
-              # Run the Docker container
               docker run -d -p 8080:8080 -e FLASK_RUN_HOST=0.0.0.0 appendix
               '
