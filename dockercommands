@@ -1,3 +1,3 @@
 docker build -t appendix .
 
-docker run -p 5050:5050 -e FLASK_RUN_HOST=0.0.0.0 appendix
+docker run -p 8080:8080 -e FLASK_RUN_HOST=0.0.0.0 appendix
