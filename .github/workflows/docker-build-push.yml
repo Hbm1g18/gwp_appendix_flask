@@ -22,7 +22,7 @@ jobs:
           ssh -o StrictHostKeyChecking=no -i private_key ${USER_NAME}@${HOSTNAME} '
 
               # Change directory to your app directory
-              cd /path/to/your/app/gwp_appendix_flask &&
+              cd /home/ec2-user/gwp_appendix_flask &&
               
               # Update the code from the main branch
               git pull origin main &&
@@ -36,4 +36,3 @@ jobs:
               # Run the Docker container
               docker run -d -p 8080:8080 -e FLASK_RUN_HOST=0.0.0.0 appendix
               '
-
