@@ -26,6 +26,7 @@ jobs:
               git pull origin main &&
               sudo docker stop $(sudo docker ps -aq) &&
               sudo docker rm $(sudo docker ps -aq) &&
+              docker system prune -af &&
               docker build -t appendix . &&
               docker run -d -p 8080:8080 -e FLASK_RUN_HOST=0.0.0.0 appendix
               '
