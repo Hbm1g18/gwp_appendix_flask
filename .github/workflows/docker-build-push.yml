@@ -19,7 +19,7 @@ jobs:
             USER_NAME: ${{secrets.EC2_USERNAME}}
 
         run: |
-          echo "Starting deployment"
+          echo "Starting deployment:"
           echo "$PRIVATE_KEY" > private_key && chmod 600 private_key
           ssh -o StrictHostKeyChecking=no -i private_key ec2-user@16.170.255.102 '
               cd gwp_appendix_flask/ &&
