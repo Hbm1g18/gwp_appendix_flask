@@ -1,35 +1,31 @@
-name: Docker Build and Deploy
+name: Deploy
 
 on:
   push:
-    branches:
-      - main
+    branches: [ main ]
 
 jobs:
-  build:
+  Deploy:
+    name: Deploy to EC2
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v2
+    
+      - uses: actions/checkout@v2 
+      - name: Build & Deploy
+        env:
+            PRIVATE_KEY: ${{ secrets.EC2_SSH_KEY }}
+            HOSTNAME: ${{secrets.EC2_HOST}}
+            USER_NAME: ${{secrets.EC2_USERNAME}}
 
-    - name: Login to Docker Hub
-      run: docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
-
-    - name: Build Docker image
-      run: docker build -t hbm1g18/appendix .
-
-    - name: Push Docker image to Docker Hub
-      run: docker push hbm1g18/appendix
-
-    - name: SSH into EC2 instance and deploy
-      uses: appleboy/ssh-action@master
-      with:
-        host: ${{ secrets.EC2_HOST }}
-        username: ${{ secrets.EC2_USERNAME }}
-        key: ${{ secrets.EC2_SSH_KEY }}
-        script: |
-          docker pull hbm1g18/appendix
-          docker stop appendix-gen || true
-          docker rm appendix-gen || true
-          docker run -d --name appendix-gen -p 8080:8080 -e FLASK_RUN_HOST=0.0.0.0 hbm1g18/appendix
+        run: |
+          echo "Starting deployment:"
+          echo "$PRIVATE_KEY" > private_key && chmod 600 private_key
+          ssh -o StrictHostKeyChecking=no -i private_key ec2-user@16.170.255.102 '
+              cd gwp_appendix_flask/ &&
+              git pull origin main &&
+              sudo docker stop $(sudo docker ps -aq) &&
+              sudo docker rm $(sudo docker ps -aq) &&
+              docker build -t appendix . &&
+              docker run -d -p 8080:8080 -e FLASK_RUN_HOST=0.0.0.0 appendix
+              '
