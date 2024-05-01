@@ -168,7 +168,7 @@ def process_data():
                         \hrule
                                 \begin{minipage}[c][2cm][c]{\textwidth} % Adjust height and alignment
                             \centering
-                                    \includegraphics[height=1.8cm]{photos/1.png}
+                                    \includegraphics[height=1.8cm]{static/logo/gwp.png}
                                 \end{minipage}
                         \end{minipage}%
                         \vline % Vertical line
@@ -240,7 +240,7 @@ def process_data():
                             \hrule
                                     \begin{minipage}[c][2cm][c]{\textwidth} % Adjust height and alignment
                                 \centering
-                                        \includegraphics[height=1.8cm]{photos/1.png}
+                                        \includegraphics[height=1.8cm]{static/logo/gwp.png}
                                     \end{minipage}
                             \end{minipage}%
                             \vline % Vertical line
@@ -579,9 +579,9 @@ def download_file(filename):
     return send_from_directory(GENERATION_FOLDER, filename, as_attachment=True)
 
 # local
-# if __name__ == '__main__':
-#     app.run(host="0.0.0.0", port=5050, debug=True, ssl_context=('cert.pem', 'key.pem'))
+if __name__ == '__main__':
+     app.run(host="0.0.0.0", port=5000, debug=True, ssl_context=('cert.pem', 'key.pem'))
 
 # docker
-if __name__ == '__main__':
-    app.run(ssl_context=('cert.pem', 'key.pem'), host='0.0.0.0')
+#if __name__ == '__main__':
+#    app.run(ssl_context=('cert.pem', 'key.pem'), host='0.0.0.0')
