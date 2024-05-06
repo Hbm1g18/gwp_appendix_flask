@@ -3,12 +3,13 @@ import pandas as pd
 import os
 import subprocess
 import shutil
-from PIL import Image, ExifTags
+from PIL import Image
 import zipfile
+import concurrent.futures
 
 app = Flask(__name__)
 UPLOAD_FOLDER = os.path.join('static', 'uploads')
-GENERATION_FOLDER = os.path.join('static', 'generation')  # New generation folder path
+GENERATION_FOLDER = os.path.join('static', 'generation')
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 root = os.getcwd()
 
@@ -36,12 +37,10 @@ def index():
         if not file.filename.endswith('.csv'):
             return "Please upload a CSV file"
         
-        # Save the file to the 'static' folder
         file_path = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
         file.save(file_path)
         
         try:
-            # Read the file with pandas
             df = pd.read_csv(file_path, sep='\t')
             headers = df.columns.tolist()
             
@@ -56,38 +55,22 @@ def process_data():
     if request.method == 'POST':
         filename = request.form.get('filename')
 
-        project = request.form.get('project')  # Retrieve job code from form
-        client = request.form.get('client')      # Retrieve client from form
-        appendix = request.form.get('appendix')  # Retrieve appendix number from form
+        project = request.form.get('project')
+        client = request.form.get('client')
+        appendix = request.form.get('appendix')
         notes = request.form.get('notes') 
 
         split_data = request.form.get('split_data')
         split_field = request.form.get('split_field_dropdown') if split_data == 'true' else None
-        if split_data == 'true':
-            print(split_field)
 
-        if request.form.get('two_per_page') == 'true':
-            print("Checkbox is checked")
-        else:
-            print("Checkbox is not checked")
-        
-        # Construct the path to the file
         file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-        
-        # Read the file into a DataFrame using pandas
+
         df = pd.read_csv(file_path, sep='\t')
-        print(request.form.get('header_count'))
-        
-        # Get all selected headers from the form
+
         selected_headers = [request.form.get(f'header{i}') for i in range(0, int(request.form.get('header_count')) + 1)]
-        print(selected_headers)
         selected_headers.append("URLs")
         selected_headers.append("ObjectID")
-        
-        # Filter DataFrame based on selected headers
-        # filtered_df = df[selected_headers]
 
-        # df_urls = filtered_df.assign(URLs=df['URLs'].str.split(',')).explode('URLs')
         df_urls = df.assign(URLs=df['URLs'].str.split(',')).explode('URLs')
 
         df_urls.reset_index(drop=True, inplace=True)
@@ -95,28 +78,27 @@ def process_data():
         df_urls.rename(columns={'index': 'Index'}, inplace=True)
         df_urls['Index'] += 1
         df_urls.to_csv("checkme.csv")
-        print(df_urls)
 
-        # Check if 'photos' folder exists, if not, create it
         generation_photos_folder = os.path.join(GENERATION_FOLDER, 'photos')
         if not os.path.exists(generation_photos_folder):
             os.makedirs(generation_photos_folder)
 
         os.chdir(GENERATION_FOLDER)
 
-        # Create a list of curl commands for batch downloading
-        curl_commands = []
-        for index, row in df_urls.iterrows():
-            url = row['URLs']
-            curl_commands.append(['curl', '-o', f'photos/{row["Index"]}.png', url])
+        with concurrent.futures.ThreadPoolExecutor(max_workers=os.cpu_count()) as executor:
+            futures = []
 
-        for command in curl_commands:
-            subprocess.run(command, check=True)
+            for index, row in df_urls.iterrows():
+                url = row['URLs']
+                future = executor.submit(download_image, url, index)
+                futures.append(future)
 
-        # Construct the image file paths relative to the photos folder
+            for future in concurrent.futures.as_completed(futures):
+                index, error = future.result()
+                if error:
+                    print(f"Error downloading image {index}: {error}")
+
         image_files = [f'photos/{index}.png' for index in range(1, len(df_urls) + 1)]
-
-        # Create the DataFrame with the correct paths
         images_df = pd.DataFrame({'Index': range(1, len(df_urls) + 1), 'File_Path': image_files})
 
 
@@ -133,6 +115,7 @@ def process_data():
         \usepackage{fontspec}
         \setmainfont{Tahoma}
         \usepackage[utf8]{inputenc}
+        \batchmode
 
         \setlength{\fboxsep}{0pt} % <-- Add this line
         \captionsetup[subfigure]{labelformat=empty}
@@ -153,50 +136,63 @@ def process_data():
                         \caption{#comment_string#}
                     \end{subfigure}
 
-                    \vspace{\baselineskip}
-
+                    \vspace{1mm}
                     \hrule
-                    \begin{minipage}[c][3.5cm][t]{0.4\textwidth} % Larger Left side
-                            %\centering
-                        \begin{minipage}[t][1.5cm][t]{0.4\textwidth} % Set explicit width for Right top
-                        \vspace{2mm}
-                        \hspace{2mm}
-                            \raggedright
-                            \textbf{\small{Notes:} \footnotesize{#notes#}}
-
-                        \end{minipage}
-                        \hrule
-                                \begin{minipage}[c][2cm][c]{\textwidth} % Adjust height and alignment
-                            \centering
-                                    \includegraphics[height=1.8cm]{static/logo/gwp.png}
+                \begin{minipage}[c][4.5cm][t]{1\textwidth} 
+                    \begin{minipage}[t][2cm][t]{0.5\textwidth} 
+	 				\vspace{2mm}
+					\centering
+					\textbf{\small{NOTES:}} \\ 
+					\raggedright 
+					\begin{itemize}
+            					\item \footnotesize{#notes#}
+       				 	\end{itemize}
+                            	\end{minipage}
+				\vrule
+				\begin{minipage}[t][2cm][t]{0.5\textwidth} 
+                                		\vspace{2mm}     
+                                		\hspace{2mm}
+                                    	\raggedright
+                                		\text{\small{\textcolor[rgb]{0.1255,0.3058,0.4745}{Client:}} \\ 
+                                		\hspace{6mm} \footnotesize{#client#}} 
                                 \end{minipage}
-                        \end{minipage}%
-                        \vline % Vertical line
-                        \begin{minipage}[c][3cm][t]{0.6\textwidth} % Larger Right side with no indentation
-                            \begin{minipage}[c][1cm][t]{0.8\textwidth} % Set explicit width for Right top
-                        \vspace{2mm}     
-                        \hspace{2mm}
-                            \raggedright
-                        \textbf{\small{Client: } \footnotesize{#client#}} 
-                            \end{minipage}
-                            \hrule % Horizontal line
-                            \begin{minipage}[c][1.4cm][t]{0.9\textwidth} % Set explicit width for Right bottom
-                                \vspace{2mm}
-                                \hspace*{2mm}
-                                \raggedright
-                                \parbox[t]{\linewidth}{\textbf{\small{Project:}} {\hangindent=2mm #project#}}
-                            \end{minipage}
-                            \hrule % Horizontal line
-                            \begin{minipage}[c][0.6cm][t]{0.8\textwidth} % Set explicit width for Right bottom    
-                        \vspace{2mm}
-                        \hspace{2mm}
-                            \raggedright
-                        \textbf{\footnotesize Appendix: #appendix#} 
-                            \end{minipage}
-                        \end{minipage}
-                    
+                                \hrule
+                                \begin{minipage}[c][2.5cm][c]{0.5\textwidth} 
+        					\centering
+                				\includegraphics[height=2.3cm]{../logo/gwp.png}
+            			\end{minipage}
+				\vrule
+				\begin{minipage}[c][2.5cm][c]{0.495\textwidth} 
+        				\begin{minipage}[c][1.3cm][c]{1\textwidth} 
+            				\vspace{2mm}
+            				\hspace*{2mm}
+            				\raggedright
+            				\text{\small{\textcolor[rgb]{0.1255,0.3058,0.4745}{Project: }} \\ 
+                				\hspace{6mm} \footnotesize{#project#}}
+        				\end{minipage}
+        				\hrule
+        				\begin{minipage}[c][1.2cm][t]{1\textwidth} 
+            				\begin{minipage}[c][1.2cm][t]{0.7\textwidth}    
+        						\vspace{1mm}
+       						\hspace{2mm}
+            					\raggedright
+        						\text{\small{\textcolor[rgb]{0.1255,0.3058,0.4745}{Drawing No}} \\ 
+        						\hspace{6mm} \footnotesize{#appendix#}} 
+        					\end{minipage}
+        					\vline
+        					\begin{minipage}[c][1.2cm][t]{0.2\textwidth}   
+        						\vspace{1mm}
+        						\hspace{2mm}
+            					\raggedright
+        						\text{\small{\textcolor[rgb]{0.1255,0.3058,0.4745}{Version}} \\ 
+        						\hspace{12mm} \footnotesize{a}} 
+        					\end{minipage}	
+        				\end{minipage}
+    				\end{minipage}
+                    \end{minipage} 
                 }}
         \end{figure}
+        \clearpage
         """
 
         # ---------------------------------------------------------End A4 Template-----------------------------------------------------
@@ -213,7 +209,6 @@ def process_data():
                     \includegraphics[width=0.37\textheight, angle=#angle1#]{#photopath1#}
                     \captionsetup{width=0.8\linewidth}
                     \caption{#CAPTION1#}
-                    %\label{fig:dragon1}
                 \end{subfigure}
 
                 \vspace{\baselineskip}
@@ -223,63 +218,67 @@ def process_data():
                     \includegraphics[width=0.37\textheight, angle=#angle2#]{#photopath2#}
                     \captionsetup{width=0.8\linewidth}
                     \caption{#CAPTION2#}
-                    %\label{fig:dragon1}
                 \end{subfigure}
-
-                    \vspace{\baselineskip}
-
+                    \vspace{1mm}
                     \hrule
-                    \begin{minipage}[c][3.5cm][t]{0.4\textwidth} % Larger Left side
-                            \begin{minipage}[t][1.5cm][t]{0.4\textwidth} % Set explicit width for Right top
-                            \vspace{2mm}
-                            \hspace{2mm}
-                                \raggedright
-                                \textbf{\small{Notes:} \footnotesize{#notes#}}
-
-                            \end{minipage}
-                            \hrule
-                                    \begin{minipage}[c][2cm][c]{\textwidth} % Adjust height and alignment
-                                \centering
-                                        \includegraphics[height=1.8cm]{static/logo/gwp.png}
-                                    \end{minipage}
-                            \end{minipage}%
-                            \vline % Vertical line
-                            \begin{minipage}[c][3cm][t]{0.6\textwidth} % Larger Right side with no indentation
-                                \begin{minipage}[c][1cm][t]{0.8\textwidth} % Set explicit width for Right top
-                                \vspace{2mm}     
-                                \hspace{2mm}
-                                    \raggedright
-                                \textbf{\small{Client: } \footnotesize{#client#}} 
+                \begin{minipage}[c][4.5cm][t]{1\textwidth} 
+                    \begin{minipage}[t][2cm][t]{0.5\textwidth} 
+	 				\vspace{2mm}
+					\centering
+					\textbf{\small{NOTES:}} \\ 
+					\raggedright 
+					\begin{itemize}
+            					\item \footnotesize{#notes#}
+       				 	\end{itemize}
+                            	\end{minipage}
+				\vrule
+				\begin{minipage}[t][2cm][t]{0.5\textwidth} 
+                                		\vspace{2mm}     
+                                		\hspace{2mm}
+                                    	\raggedright
+                                		\text{\small{\textcolor[rgb]{0.1255,0.3058,0.4745}{Client:}} \\ 
+                                		\hspace{6mm} \footnotesize{#client#}} 
                                 \end{minipage}
-                                \hrule % Horizontal line
-                                \begin{minipage}[c][1.4cm][t]{0.9\textwidth} % Set explicit width for Right bottom
-                                    \vspace{2mm}
-                                    \hspace*{2mm}
-                                    \raggedright
-                                    \parbox[t]{\linewidth}{\textbf{\small{Project:}} {\hangindent=2mm #project#}}
-                                \end{minipage}
-                                \hrule % Horizontal line
-                                \begin{minipage}[c][0.6cm][t]{0.8\textwidth} % Set explicit width for Right bottom    
-                                \vspace{2mm}
-                                \hspace{2mm}
-                                    \raggedright
-                                \textbf{\footnotesize Appendix: #appendix#} 
-                                \end{minipage}
-                            \end{minipage}
-                        
+                                \hrule
+                                \begin{minipage}[c][2.5cm][c]{0.5\textwidth} 
+        					\centering
+                				\includegraphics[height=2.3cm]{../logo/gwp.png}
+            			\end{minipage}
+				\vrule
+				\begin{minipage}[c][2.5cm][c]{0.495\textwidth} 
+        				\begin{minipage}[c][1.3cm][c]{1\textwidth} 
+            				\vspace{2mm}
+            				\hspace*{2mm}
+            				\raggedright
+            				\text{\small{\textcolor[rgb]{0.1255,0.3058,0.4745}{Project: }} \\ 
+                				\hspace{6mm} \footnotesize{#project#}}
+        				\end{minipage}
+        				\hrule
+        				\begin{minipage}[c][1.2cm][t]{1\textwidth} 
+            				\begin{minipage}[c][1.2cm][t]{0.7\textwidth}    
+        						\vspace{1mm}
+       						\hspace{2mm}
+            					\raggedright
+        						\text{\small{\textcolor[rgb]{0.1255,0.3058,0.4745}{Drawing No}} \\ 
+        						\hspace{6mm} \footnotesize{#appendix#}} 
+        					\end{minipage}
+        					\vline
+        					\begin{minipage}[c][1.2cm][t]{0.2\textwidth}   
+        						\vspace{1mm}
+        						\hspace{2mm}
+            					\raggedright
+        						\text{\small{\textcolor[rgb]{0.1255,0.3058,0.4745}{Version}} \\ 
+        						\hspace{12mm} \footnotesize{a}} 
+        					\end{minipage}	
+        				\end{minipage}
+    				\end{minipage}
+                    \end{minipage} 
                 }}
         \end{figure}
         \clearpage
         """
 
 # END TEMPLATES///////////////////////////////////////////////////////////////////////////////////////////////////////
-
-
-
-
-
-
-
         split_field = request.form.get('split_field_dropdown') if split_data == 'true' else None
 
 
@@ -291,7 +290,6 @@ def process_data():
                 df_split = df_urls[df_urls[split_field] == area]
 
                 tex_content = base_template
-                # Update the iteration process to iterate over two rows at a time
                 if 'two_per_page' in request.form and request.form['two_per_page'] == 'true':
                     for i in range(0, len(df_split), 2):
                         # Fetch data for the first entry
@@ -302,7 +300,6 @@ def process_data():
                         comment_string1 = f"Photograph {object_id1} - {chosen_headers1}"
                         file_path1 = images_df.loc[images_df['Index'] == row1['Index'], 'File_Path'].values[0]
 
-                        # Fetch data for the second entry
                         if i+1 < len(df_split):
                             row2 = df_split.iloc[i+1]
                             photo2 = row2['Index']
@@ -311,7 +308,6 @@ def process_data():
                             comment_string2 = f"Photograph {object_id2} - {chosen_headers2}"
                             file_path2 = images_df.loc[images_df['Index'] == row2['Index'], 'File_Path'].values[0]
                         else:
-                            # If the number of entries is odd, duplicate the last entry
                             row2 = row1
                             photo2 = row2['Index']
                             object_id2 = row2['ObjectID']
@@ -319,7 +315,6 @@ def process_data():
                             comment_string2 = f"Photograph {object_id2} - {chosen_headers2}"
                             file_path2 = images_df.loc[images_df['Index'] == row2['Index'], 'File_Path'].values[0]
 
-                        # Open and process the first image
                         with Image.open(file_path1) as img1:
                             width1, height1 = img1.size
                             if hasattr(img1, '_getexif'):
@@ -327,14 +322,13 @@ def process_data():
                                 if exif1:
                                     orientation1 = exif1.get(274)
                                     if orientation1 in [5, 6, 7, 8]:
-                                        width1, height1 = height1, width1  # Swap width and height
+                                        width1, height1 = height1, width1
                                         angle1 = -90
                                     else:
                                         angle1 = 0
                             else:
                                 angle1 = 0
 
-                        # Open and process the second image
                         with Image.open(file_path2) as img2:
                             width2, height2 = img2.size
                             if hasattr(img2, '_getexif'):
@@ -342,14 +336,13 @@ def process_data():
                                 if exif2:
                                     orientation2 = exif2.get(274)
                                     if orientation2 in [5, 6, 7, 8]:
-                                        width2, height2 = height2, width2  # Swap width and height
+                                        width2, height2 = height2, width2
                                         angle2 = -90
                                     else:
                                         angle2 = 0
                             else:
                                 angle2 = 0
 
-                        # Build the TeX content using the two-page section template
                         section_content = two_pagesection_template.replace("#photopath1#", file_path1)\
                             .replace("#photopath2#", file_path2)\
                             .replace("#CAPTION1#", comment_string1)\
@@ -361,34 +354,27 @@ def process_data():
                             .replace("#notes#", notes)\
                             .replace("#appendix#", appendix)
 
-                        # Append the section content to the overall TeX content
                         tex_content += section_content
 
                 else:
                     for index, row in df_split.iterrows():
-                        # Check if the index exists in images_df
                         if index < len(images_df):
-                            # Fetch data from df_urls
                             photo = row['Index']
                             object_id = row['ObjectID']
                             chosen_headers = ", ".join([str(row[header]) for header in selected_headers if header != 'ObjectID' and header != 'URLs'])
                             comment_string = ""
                             comment_string += f"Photograph {object_id} - {chosen_headers}"
 
-                            # Fetch data from images_df
                             file_path = images_df.loc[index, 'File_Path']
                             with Image.open(file_path) as img:
-                                print(f"Opening {file_path}")
                                 
                                 width, height = img.size
                                 
-                                # Check if the image has orientation metadata
                                 if hasattr(img, '_getexif'):
                                     exif = img._getexif()
                                     if exif:
                                         orientation = exif.get(274)
                                         if orientation in [5, 6, 7, 8]:
-                                            # Swap width and height
                                             width, height = height, width
                                             angle = -90
                                             img_width = 0.37
@@ -398,8 +384,6 @@ def process_data():
                                 else:
                                     angle = 0
                                     img_width = 0.42
-
-                            # Build the TeX content using the section template
                             section_content = a4section_template.replace("#photopath1#", file_path)\
                                                                 .replace("#comment_string#", comment_string)\
                                                                 .replace("#angle#", str(angle))\
@@ -408,27 +392,17 @@ def process_data():
                                                                 .replace("#client#", client)\
                                                                 .replace("#notes#", notes)\
                                                                 .replace("#appendix#", appendix)
-
-                            # Append the section content to the overall TeX content
                             tex_content += section_content
-
-
-
-
                 # ---------------------------------------------------------End 2 page Template-----------------------------------------------------
 
-
-                # Close the TeX document
                 tex_content += r"\end{document}"
 
-                # Write the generated TeX content to a file
                 with open(f"{area}.tex", "w") as tex_file:
                     tex_file.write(tex_content)
                 
-                subprocess.run(["lualatex", f"{area}.tex"])
+                subprocess.run(["lualatex", f"{area}.tex"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
             with zipfile.ZipFile("output.zip", "w") as zip_file:
-                # Add each PDF file to the zip file
                 for area in split_areas:
                     pdf_file = f"{area}.pdf"
                     if os.path.exists(pdf_file):
@@ -436,12 +410,9 @@ def process_data():
             return render_template('download.html', filename="output.zip")
 
         else:
-    
             tex_content = base_template
-            # Update the iteration process to iterate over two rows at a time
             if 'two_per_page' in request.form and request.form['two_per_page'] == 'true':
                 for i in range(0, len(df_urls), 2):
-                    # Fetch data for the first entry
                     row1 = df_urls.iloc[i]
                     photo1 = row1['Index']
                     object_id1 = row1['ObjectID']
@@ -449,7 +420,6 @@ def process_data():
                     comment_string1 = f"Photograph {object_id1} - {chosen_headers1}"
                     file_path1 = images_df.loc[i, 'File_Path']
 
-                    # Fetch data for the second entry
                     if i+1 < len(df_urls):
                         row2 = df_urls.iloc[i+1]
                         photo2 = row2['Index']
@@ -458,7 +428,6 @@ def process_data():
                         comment_string2 = f"Photograph {object_id2} - {chosen_headers2}"
                         file_path2 = images_df.loc[i+1, 'File_Path']
                     else:
-                        # If the number of entries is odd, duplicate the last entry
                         row2 = row1
                         photo2 = row2['Index']
                         object_id2 = row2['ObjectID']
@@ -466,7 +435,6 @@ def process_data():
                         comment_string2 = f"Photograph {object_id2} - {chosen_headers2}"
                         file_path2 = images_df.loc[i, 'File_Path']
 
-                    # Open and process the first image
                     with Image.open(file_path1) as img1:
                         width1, height1 = img1.size
                         if hasattr(img1, '_getexif'):
@@ -474,14 +442,13 @@ def process_data():
                             if exif1:
                                 orientation1 = exif1.get(274)
                                 if orientation1 in [5, 6, 7, 8]:
-                                    width1, height1 = height1, width1  # Swap width and height
+                                    width1, height1 = height1, width1
                                     angle1 = -90
                                 else:
                                     angle1 = 0
                         else:
                             angle1 = 0
 
-                    # Open and process the second image
                     with Image.open(file_path2) as img2:
                         width2, height2 = img2.size
                         if hasattr(img2, '_getexif'):
@@ -489,14 +456,13 @@ def process_data():
                             if exif2:
                                 orientation2 = exif2.get(274)
                                 if orientation2 in [5, 6, 7, 8]:
-                                    width2, height2 = height2, width2  # Swap width and height
+                                    width2, height2 = height2, width2
                                     angle2 = -90
                                 else:
                                     angle2 = 0
                         else:
                             angle2 = 0
 
-                    # Build the TeX content using the two-page section template
                     section_content = two_pagesection_template.replace("#photopath1#", file_path1)\
                         .replace("#photopath2#", file_path2)\
                         .replace("#CAPTION1#", comment_string1)\
@@ -507,35 +473,26 @@ def process_data():
                         .replace("#client#", client)\
                         .replace("#notes#", notes)\
                         .replace("#appendix#", appendix)
-
-                    # Append the section content to the overall TeX content
                     tex_content += section_content
 
             else:
                 for index, row in df_urls.iterrows():
-                    # Check if the index exists in images_df
                     if index < len(images_df):
-                        # Fetch data from df_urls
                         photo = row['Index']
                         object_id = row['ObjectID']
                         chosen_headers = ", ".join([str(row[header]) for header in selected_headers if header != 'ObjectID' and header != 'URLs'])
                         comment_string = ""
                         comment_string += f"Photograph {object_id} - {chosen_headers}"
 
-                        # Fetch data from images_df
                         file_path = images_df.loc[index, 'File_Path']
                         with Image.open(file_path) as img:
-                            print(f"Opening {file_path}")
                             
                             width, height = img.size
-                            
-                            # Check if the image has orientation metadata
                             if hasattr(img, '_getexif'):
                                 exif = img._getexif()
                                 if exif:
                                     orientation = exif.get(274)
                                     if orientation in [5, 6, 7, 8]:
-                                        # Swap width and height
                                         width, height = height, width
                                         angle = -90
                                         img_width = 0.37
@@ -545,8 +502,6 @@ def process_data():
                             else:
                                 angle = 0
                                 img_width = 0.42
-
-                        # Build the TeX content using the section template
                         section_content = a4section_template.replace("#photopath1#", file_path)\
                                                             .replace("#comment_string#", comment_string)\
                                                             .replace("#angle#", str(angle))\
@@ -555,33 +510,28 @@ def process_data():
                                                             .replace("#client#", client)\
                                                             .replace("#notes#", notes)\
                                                             .replace("#appendix#", appendix)
-
-                        # Append the section content to the overall TeX content
                         tex_content += section_content
-
-            # Close the TeX document
             tex_content += r"\end{document}"
-
-            # Write the generated TeX content to a file
             with open("output.tex", "w") as tex_file:
                 tex_file.write(tex_content)
-
-                
-            subprocess.run(["lualatex", f"output.tex"])
-            
-            
-
-
+            subprocess.run(["lualatex", f"output.tex"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         return render_template('download.html', filename="output.pdf")
     
 @app.route('/download/<filename>')
 def download_file(filename):
     return send_from_directory(GENERATION_FOLDER, filename, as_attachment=True)
 
+def download_image(url, index):
+    try:
+        subprocess.run(['curl', '-o', f'photos/{index+1}.png', url], check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        return index, None 
+    except Exception as e:
+        return None, e  
+
 # local
-if __name__ == '__main__':
-     app.run(host="0.0.0.0", port=5000, debug=True, ssl_context=('cert.pem', 'key.pem'))
+# if __name__ == '__main__':
+#      app.run(host="0.0.0.0", port=5050, debug=True, ssl_context=('cert.pem', 'key.pem'))
 
 # docker
-#if __name__ == '__main__':
-#    app.run(ssl_context=('cert.pem', 'key.pem'), host='0.0.0.0')
+if __name__ == '__main__':
+   app.run(ssl_context=('cert.pem', 'key.pem'), host='0.0.0.0')

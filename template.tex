@@ -1,0 +1,96 @@
+
+\documentclass[12pt, letterpaper]{article}
+\usepackage{graphicx}
+\usepackage{subcaption}
+\usepackage[left=10mm,right=10mm,top=5mm,bottom=5mm,paper=a4paper]{geometry}
+\usepackage{multirow}
+\usepackage{caption}  % Added for \captionof
+\usepackage{xcolor}
+\usepackage{fontspec}
+\setmainfont{Tahoma}
+\usepackage[utf8]{inputenc}
+\usepackage{enumitem}
+
+\setlength{\fboxsep}{0pt} % <-- Add this line
+\captionsetup[subfigure]{labelformat=empty}
+
+\begin{document}
+
+\begin{figure}[h]
+    \centering
+    \fbox{\parbox{1\linewidth}{
+    \vspace{5mm}
+        \begin{subfigure}{\linewidth}
+            \centering
+            \includegraphics[width=0.37\textheight, angle=#angle1#]{#photopath1#}
+            \captionsetup{width=0.8\linewidth}
+            \caption{#CAPTION1#}
+        \end{subfigure}
+
+        \vspace{\baselineskip}
+
+        \begin{subfigure}{\linewidth}
+            \centering
+            \includegraphics[width=0.37\textheight, angle=#angle2#]{#photopath2#}
+            \captionsetup{width=0.8\linewidth}
+            \caption{#CAPTION2#}
+        \end{subfigure}
+            \vspace{1mm}
+            \hrule
+                    \begin{minipage}[c][4.5cm][t]{1\textwidth} 
+                         \begin{minipage}[t][2cm][t]{0.5\textwidth} 
+             \vspace{2mm}
+            \centering
+            \textbf{\small{NOTES:}} \\ 
+            \raggedright 
+            \begin{itemize}
+                        \item \footnotesize{#notes#}
+                    \end{itemize}
+                        \end{minipage}
+        \vrule
+        \begin{minipage}[t][2cm][t]{0.5\textwidth} 
+                                \vspace{2mm}     
+                                \hspace{2mm}
+                                \raggedright
+                                \text{\small{\textcolor[rgb]{0.1255,0.3058,0.4745}{Client:}} \\ 
+                                \hspace{6mm} \footnotesize{#client#}} 
+                        \end{minipage}
+                        \hrule
+                        \begin{minipage}[c][2.5cm][c]{0.5\textwidth} 
+                    \centering
+                        \includegraphics[height=2.3cm]{../logo/gwp.png}
+                \end{minipage}
+        \vrule
+        \begin{minipage}[c][2.5cm][c]{0.495\textwidth} 
+                \begin{minipage}[c][1.3cm][c]{1\textwidth} 
+                    \vspace{2mm}
+                    \hspace*{2mm}
+                    \raggedright
+                    \text{\small{\textcolor[rgb]{0.1255,0.3058,0.4745}{Project: }} \\ 
+                        \hspace{6mm} \footnotesize{#project#}}
+                \end{minipage}
+                \hrule
+                \begin{minipage}[c][1.2cm][t]{1\textwidth} 
+                    \begin{minipage}[c][1.2cm][t]{0.7\textwidth}    
+                        \vspace{1mm}
+                       \hspace{2mm}
+                        \raggedright
+                        \text{\small{\textcolor[rgb]{0.1255,0.3058,0.4745}{Drawing No}} \\ 
+                        \hspace{6mm} \footnotesize{#appendix#}} 
+                    \end{minipage}
+                    \vline
+                    \begin{minipage}[c][1.2cm][t]{0.2\textwidth}   
+                        \vspace{1mm}
+                        \hspace{2mm}
+                        \raggedright
+                        \text{\small{\textcolor[rgb]{0.1255,0.3058,0.4745}{Version}} \\ 
+                        \hspace{12mm} \footnotesize{a}} 
+                    \end{minipage}	
+                \end{minipage}
+            \end{minipage}
+
+                    \end{minipage} 
+        }}
+\end{figure}
+\clearpage
+\end{document}
